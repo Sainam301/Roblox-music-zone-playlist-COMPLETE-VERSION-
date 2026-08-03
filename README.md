@@ -1,7 +1,7 @@
 # 🛠️ Installation & Placement Guide
 To make the system work correctly, place the components in these exact locations in Roblox Studio:
 ⚬ Script Location: Place your LocalScript directly inside StarterPlayer \rightarrow StarterPlayerScripts.
-⚬ Zone Part Naming: Create a Part in Workspace where players stand to hear music. Rename this Part to Song part #1 (or match the exact name set in 		your script). Ensure it is Anchored = true and CanCollide = false.
+⚬ Zone Part Naming: Create a Part in Workspace where players stand to hear music. Rename this Part to Song part (or match the exact name set in 		your script). Ensure it is Anchored = true and CanCollide = false.
 ⚬ Music Audio Files: Drag your Roblox Sound instances directly inside the LocalScript.
 ⚬ Announcements (Optional): If using announcements, place your announcement Sound object (e.g., MallAnnouncement) directly inside the LocalScript alongside your songs.
 # ⚙️ Configuration & Variables
