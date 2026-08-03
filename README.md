@@ -1,3 +1,29 @@
+# How to use
+
+Configuration Options & Defaults
+⚬	START_SONG_NAME: Set this string to the exact Name property of the Sound instance inside your script that you want to play first (e.g., "Upbeat Pop Track").
+⚬	AUDIO_VERSION: Controls which acoustic preset gets loaded on startup. Options are "Custom", "Mall", "Concert", or "Hall".
+⚬	ANNOUNCEMENT_INTERVAL: (Announcements script only) Integer defining the delay in seconds between scheduled announcement plays (default is 180).
+⚬	_G.AudioEffectsEnabled: Global boolean flag (true/false) that allows external scripts to toggle live audio processing on or off in real time.
+⚬	zonePart: Automatically searches workspace for a part named "song", "Song part", or "Song". If found, bounds music playback to that 3D box; if missing, defaults to playing world-wide.
+Audio Effects Architecture
+Both scripts generate native Roblox audio instances programmatically at runtime and attach them directly to the active playback source:
+⚬	EqualizerSoundEffect (clubEQ): Modifies tonal frequencies directly on the playing track:
+⚬	LowGain: Bass adjustment in decibels.
+⚬	MidGain: Mid-range vocal/instrument presence in decibels.
+⚬	HighGain: Treble and high-frequency sparkle in decibels.
+⚬	ReverbSoundEffect (clubReverb): Generates 3D spatial depth:
+⚬	DecayTime: Length of the echo tail in seconds.
+⚬	Density & Diffusion: Echo reflection tightness and space fullness.
+⚬	WetLevel: Balance of processed spatial audio mixed over the dry track.
+Output & Console Debugging
+Roblox Studio routes all logging to the Output window (View tab -> Output):
+⚬	print(): Displays track switches (▶️ Attempting to play song...), zone detections (✅ Bound to zone part...), and successful playback triggers (🔊 Music playing now!).
+⚬	warn(): Triggers yellow warning messages if the designated zone part cannot be located (⚠️ Zone part missing...) or if no Sound objects are parented inside the LocalScript.
+
+# Free published script down here
+
+
 # 1. Standard Zone Playlist (No Announcements)
 
 --==============================================================================
