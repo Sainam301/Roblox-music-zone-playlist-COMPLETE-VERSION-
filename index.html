@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Spatial Audio System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #f8fafc;
+        }
+
+        /* Ambient background glow elements for backdrop-filter depth */
+        .ambient-glow-1 {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Left Sidebar Layout */
+        .sidebar {
+            position: relative;
+            z-index: 1;
+            width: 320px;
+            min-width: 320px;
+            padding: 40px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .sidebar-subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        /* Animated Glowing Download Button */
+        .download-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 16px 28px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        /* Button Shine Animation */
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.25),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.55);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(-1px) scale(0.99);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .download-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .download-btn:hover svg {
+            transform: translateY(2px);
+        }
+
+        /* Center Divider Glow Line */
+        .divider {
+            position: relative;
+            z-index: 1;
+            width: 2px;
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0) 0%, rgba(99, 102, 241, 0.5) 50%, rgba(168, 85, 247, 0) 100%);
+            height: 100%;
+        }
+
+        /* Right Content Panel Layout */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            flex-grow: 1;
+            padding: 50px 60px;
+            overflow-y: auto;
+            line-height: 1.7;
+            background: rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Custom Scrollbar */
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .section-header {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+            color: #f1f5f9;
+            letter-spacing: -0.3px;
+        }
+
+        .section-header:first-of-type {
+            margin-top: 0;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 14px;
+            position: relative;
+            padding-left: 24px;
+            color: #cbd5e1;
+            font-size: 15px;
+        }
+
+        li::before {
+            content: "•";
+            position: absolute;
+            left: 4px;
+            top: -2px;
+            font-size: 22px;
+            line-height: 1;
+            color: #38bdf8;
+        }
+
+        strong {
+            color: #f8fafc;
+        }
+
+        code {
+            background-color: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.88em;
+            color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <div class="brand-container">
+            <div class="sidebar-title">Zone Audio Engine</div>
+            <div class="sidebar-subtitle">Roblox Spatial Playlist & Environment Framework by KCE</div>
+        </div>
+        <a href="https://github.com/Sainam301/Roblox-music-zone-playlist-COMPLETE-VERSION-" target="_blank" class="download-btn">
+            <span>Download</span>
+            <svg viewBox="0 0 24 24">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+        </a>
+    </div>
+
+    <!-- Glow Center Divider -->
+    <div class="divider"></div>
+
+    <!-- Right Main Documentation Panel -->
+    <div class="main-content">
+        
+        <div class="section-header">🛠️ Installation & Placement Guide</div>
+        <ul>
+            <li><strong>Script Location</strong>: Place your <code>LocalScript</code> directly inside <code>StarterPlayer</code> &rarr; <code>StarterPlayerScripts</code>.</li>
+            <li><strong>Zone Part Naming</strong>: Create a Part in <code>Workspace</code> where players stand to hear music. Rename this Part to <code>Song part #1</code> (or match the exact name set in your script). Ensure it is <code>Anchored = true</code> and <code>CanCollide = false</code>.</li>
+            <li><strong>Music Audio Files</strong>: Drag your Roblox <code>Sound</code> instances directly inside the <code>LocalScript</code>.</li>
+            <li><strong>Announcements (Optional)</strong>: If using announcements, place your announcement <code>Sound</code> object (e.g., <code>MallAnnouncement</code>) directly inside the <code>LocalScript</code> alongside your songs.</li>
+        </ul>
+
+        <div class="section-header">⚙️ Configuration & Variables</div>
+        <ul>
+            <li><strong>START_SONG_NAME</strong>: Set this string to the exact <code>Name</code> property of the <code>Sound</code> instance inside your script that should play first (e.g., <code>"#2"</code> or <code>"clip"</code>).</li>
+            <li><strong>AUDIO_VERSION</strong>: Selects the active acoustic profile. Options are <code>"Mall"</code>, <code>"Concert"</code>, or <code>"Hall"</code>.</li>
+            <li><strong>ANNOUNCEMENT_TRIGGER</strong>: Defines when announcements trigger—set to <code>"Every Song"</code> or list target track names in a table like <code>{"Love is"}</code>.</li>
+            <li><strong>ANNOUNCEMENTS_ENABLED</strong>: A boolean flag (<code>true</code>/<code>false</code>) at the top of the script that lets you toggle announcement triggers on or off completely.</li>
+            <li><strong>_G.AudioEffectsEnabled</strong>: A global boolean flag (<code>true</code>/<code>false</code>) allowing external scripts to dynamically toggle live spatial audio effects.</li>
+            <li><strong>zonePart</strong>: Automatically detects your zone boundary part in <code>Workspace</code> using <code>WaitForChild("Song part #1")</code>.</li>
+        </ul>
+
+        <div class="section-header">🎛️ Audio Effects Architecture</div>
+        <p style="margin-bottom: 15px; color: #cbd5e1; font-size: 15px;">Both scripts programmatically instantiate and configure real-time audio effects at runtime:</p>
+        <ul>
+            <li>
+                <strong>EqualizerSoundEffect (<code>clubEQ</code>)</strong>: Shapes frequency response on active music tracks:
+                <ul style="margin-top: 10px; margin-left: 10px;">
+                    <li><strong>LowGain</strong>: Controls sub-bass and low-end impact (e.g., boost for <code>"Concert"</code>, cut for <code>"Mall"</code>).</li>
+                    <li><strong>MidGain</strong>: Controls vocal and instrumental warmth across all acoustic environments.</li>
+                    <li><strong>HighGain</strong>: Manages high-frequency clarity and sparkle.</li>
+                </ul>
+            </li>
+            <li style="margin-top: 18px;">
+                <strong>ReverbSoundEffect (<code>clubReverb</code>)</strong>: Adds spatial width and acoustic dimension:
+                <ul style="margin-top: 10px; margin-left: 10px;">
+                    <li><strong>DecayTime</strong>: Length of the spatial echo tail (e.g., <code>5.5s</code> for cavernous <code>"Hall"</code> acoustics).</li>
+                    <li><strong>Density & Diffusion</strong>: Controls spatial reflection density and environment openness.</li>
+                    <li><strong>WetLevel</strong>: Sets the balance of processed environment audio over the raw track.</li>
+                </ul>
+            </li>
+        </ul>
+
+    </div>
+
+</body>
+</html>
